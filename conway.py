@@ -35,7 +35,8 @@ Rules:
     a live cell, as if by reproduction.
     ------------------------------------------------------------------
 '''
-
+from __future__ import absolute_import, division, print_function, \
+    with_statement
 import sys, pygame
 import random
 import time
@@ -59,9 +60,8 @@ class Game(object):
         self.next_matrix = []
         # row and col are the dimension of the matrix
         self.row = (self.height - self.offset_x - 
-            self.offset_y) / (self.gridSize + 1)
-        self.col = (self.width-2*self.offset_x) / (self.gridSize + 1)
-
+            self.offset_y) // (self.gridSize + 1)
+        self.col = (self.width-2*self.offset_x) // (self.gridSize + 1)
         self.initMatrix()
 
         pygame.init()
@@ -78,10 +78,10 @@ class Game(object):
 
     def initMatrix(self):
         the_time = time.time()
-        for y in xrange(self.row):
+        for y in range(self.row):
             self.matrix.append([])
             self.next_matrix.append([])
-            for x in xrange(self.col):
+            for x in range(self.col):
                 self.matrix[y].append({"life":False, "time":time.time()})
                 self.next_matrix[y].append({"life":False, "time":time.time()})
 
@@ -94,11 +94,11 @@ class Game(object):
         dark = (120, 120, 120)
         
         # draw vertical lines
-        for x in xrange(offset_x + 10, width + offset_x, 10):
+        for x in range(offset_x + 10, width + offset_x, 10):
             pygame.draw.line(self.screen, grey, (x, offset_y), 
                 (x, offset_y + height), 1)
         # draw horizontal lines
-        for y in xrange(offset_y + 10, height + offset_y, 10):
+        for y in range(offset_y + 10, height + offset_y, 10):
             pygame.draw.line(self.screen, grey, (offset_x, y), 
                 (width + offset_x, y), 1)
 
@@ -150,8 +150,8 @@ class Game(object):
         elif mode >= 0 and mode <= 9:
             idx = mode
 
-        for r in xrange(self.row):
-            for c in xrange(self.col):
+        for r in range(self.row):
+            for c in range(self.col):
                 if probability[idx] > random.random():
                     self.matrix[r][c] = {"life":True, "time":time.time()}
                 else:
@@ -163,10 +163,10 @@ class Game(object):
         if event.key == pygame.K_ESCAPE:
             pygame.quit()
         elif event.key == pygame.K_r:
-            print 'reseting grid...'
+            print ('reseting grid...')
             self.reset_grid()
         elif event.key == pygame.K_SPACE:
-            print 'space key pressed, game started...'
+            print ('space key pressed, game started...')
             self.conway()
         elif event.key == pygame.K_q:
             pygame.quit()
@@ -182,8 +182,8 @@ class Game(object):
     # set the state of every cell to be 'dead'
     def reset_grid(self):
 
-        for r in xrange(self.row):
-            for c in xrange(self.col):
+        for r in range(self.row):
+            for c in range(self.col):
                 if self.matrix[r][c]["life"] == True:
                     self.matrix[r][c]["life"] = False
                     rect = (c * (self.gridSize + 1)  + self.offset_x + 1, 
@@ -229,10 +229,10 @@ class Game(object):
                 mouse_up = False
 
                 # get the corresponding matrix index
-                idx_x = (x - self.offset_x) / sz
-                idx_y = (y - self.offset_y) / sz
-                off_x = x / sz * sz
-                off_y =  y / sz * sz
+                idx_x = (x - self.offset_x)//sz
+                idx_y = (y - self.offset_y)//sz
+                off_x = x // sz * sz
+                off_y =  y // sz * sz
                 rect = (off_x + 1, off_y + 1, self.gridSize, self.gridSize)
                 # this rectangle is one pixel bigger
                 last_rect = pygame.Rect(off_x, off_y, sz, sz)
@@ -247,14 +247,14 @@ class Game(object):
 
     def next_gen(self):
         the_time = time.time()
-        for r in xrange(self.row):
-            for c in xrange(self.col):
+        for r in range(self.row):
+            for c in range(self.col):
                 neighbours = self.getNeighbours(r, c)
                 # if this cell is alive
                 if self.matrix[r][c]["life"] == True:
                     # die of under-popularion or overcrowding
                     if the_time - self.next_matrix[r][c]["time"] > 5:
-                        #print u"超时"
+                        #print( u"超时")
                         self.next_matrix[r][c]["life"] = False
                     elif neighbours < 2 or neighbours > 3:
                         self.next_matrix[r][c]["life"] = False
@@ -267,14 +267,14 @@ class Game(object):
                     else :
                         self.next_matrix[r][c]["life"] = False
         # set the matrix to be the new state
-        for r in xrange(self.row):
-            for c in xrange(self.col):
+        for r in range(self.row):
+            for c in range(self.col):
                 self.matrix[r][c] = self.next_matrix[r][c]
 
     def print_state(self):
 
-        for r in xrange(self.row):
-            for c in xrange(self.col):
+        for r in range(self.row):
+            for c in range(self.col):
                 # replace the previous generation of the new generation
                 #self.matrix[r][c] = new_matrix[r][c]
 
@@ -327,7 +327,7 @@ class Game(object):
         dc = [-1, 0, 1, 1, 1, 0, -1, -1]
         neighbours = 0
 
-        for i in xrange(8):
+        for i in range(8):
             row = r + dr[i]
             col = c + dc[i]
             if row >= 0 and col >= 0 and row < self.row and col < self.col:
