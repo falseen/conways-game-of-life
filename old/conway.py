@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
 # Copyright (c) 2012 Dougam Ngou <wvvwwwvvvv@gmail.com>
 # Conway's game of life simulator
@@ -38,14 +37,13 @@ Rules:
 
 import sys, pygame
 import random
-import time
 from pygame.locals import *
 
 class Game(object):
     def __init__(self):
         # dimension of the game window
         self.width = 1280
-        self.height = 650
+        self.height = 720
         # start position of the cells
         self.offset_x = 20
         self.offset_y = 60
@@ -77,13 +75,12 @@ class Game(object):
         self.clock = pygame.time.Clock()
 
     def initMatrix(self):
-        the_time = time.time()
         for y in xrange(self.row):
             self.matrix.append([])
             self.next_matrix.append([])
             for x in xrange(self.col):
-                self.matrix[y].append({"life":False, "time":time.time()})
-                self.next_matrix[y].append({"life":False, "time":time.time()})
+                self.matrix[y].append(False)
+                self.next_matrix[y].append(False)
 
     def drawGrid(self, offset_x, offset_y):
 
@@ -117,17 +114,10 @@ class Game(object):
 
     def draw_help_text(self):
         title = 'Conway\'s game of life'
-        
         help_text = ['Mouse click to toggle cell state',
             '<SPACE> to start or pause the game', 
             '<d> or <1~9> to set random state', 
             '<r> to reset and <q> to quit']
-        '''    
-        help_text = [u'点击鼠标进行选择或取消',
-        u'按空格键<SPACE>开始或暂停游戏', 
-        u'按 d 或 1~9 随机设置细胞', 
-        u'按 r 重置  按 q 退出']    
-        '''
         
         myfont = pygame.font.SysFont('Purisa', 20, True)
         text = myfont.render(title, 1, (255, 150, 0))
@@ -142,7 +132,6 @@ class Game(object):
             
     def random_state(self, mode):
         # the probability whether a cell is initially alive
-        the_time = time.time()
         probability = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
         if mode == 0:
@@ -153,9 +142,9 @@ class Game(object):
         for r in xrange(self.row):
             for c in xrange(self.col):
                 if probability[idx] > random.random():
-                    self.matrix[r][c] = {"life":True, "time":time.time()}
+                    self.matrix[r][c] = True
                 else:
-                    self.matrix[r][c]["life"] = False
+                    self.matrix[r][c] = False
 
         
     def handle_keyboard(self, event):
@@ -184,8 +173,8 @@ class Game(object):
 
         for r in xrange(self.row):
             for c in xrange(self.col):
-                if self.matrix[r][c]["life"] == True:
-                    self.matrix[r][c]["life"] = False
+                if self.matrix[r][c] == True:
+                    self.matrix[r][c] = False
                     rect = (c * (self.gridSize + 1)  + self.offset_x + 1, 
                         r *(self.gridSize + 1) + self.offset_y + 1,
                         self.gridSize, self.gridSize)
@@ -203,7 +192,7 @@ class Game(object):
         while True:
             # make it 30 frame per second
             self.clock.tick(30)
-            the_time = time.time() 
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -237,35 +226,32 @@ class Game(object):
                 # this rectangle is one pixel bigger
                 last_rect = pygame.Rect(off_x, off_y, sz, sz)
                 # flip the cell state
-                if self.matrix[idx_y][idx_x]["life"] == True:
+                if self.matrix[idx_y][idx_x] == True:
                     pygame.draw.rect(self.screen, self.colorUnfill, rect)
-                    self.matrix[idx_y][idx_x]["life"] = False
+                    self.matrix[idx_y][idx_x] = False
                 else:
                     pygame.draw.rect(self.screen, self.colorFill, rect)
-                    self.matrix[idx_y][idx_x] = {"life":True, "time":time.time()}
+                    self.matrix[idx_y][idx_x] = True
                 pygame.display.flip()
 
     def next_gen(self):
-        the_time = time.time()
+
         for r in xrange(self.row):
             for c in xrange(self.col):
                 neighbours = self.getNeighbours(r, c)
                 # if this cell is alive
-                if self.matrix[r][c]["life"] == True:
+                if self.matrix[r][c] == True:
                     # die of under-popularion or overcrowding
-                    if the_time - self.next_matrix[r][c]["time"] > 5:
-                        #print u"超时"
-                        self.next_matrix[r][c]["life"] = False
-                    elif neighbours < 2 or neighbours > 3:
-                        self.next_matrix[r][c]["life"] = False
-                        #self.next_matrix[r][c] = {"life":True, "time":the_time}
-                        pass
+                    if neighbours < 2 or neighbours > 3:
+                        self.next_matrix[r][c] = False
+                    else :
+                        self.next_matrix[r][c] = True
                 # cell is dead
                 else :
                     if neighbours == 3:
-                        self.next_matrix[r][c] = {"life":True, "time":time.time()}
+                        self.next_matrix[r][c] = True
                     else :
-                        self.next_matrix[r][c]["life"] = False
+                        self.next_matrix[r][c] = False
         # set the matrix to be the new state
         for r in xrange(self.row):
             for c in xrange(self.col):
@@ -281,9 +267,9 @@ class Game(object):
                 rect = (c * (self.gridSize + 1)  + self.offset_x + 1, 
                     r * (self.gridSize + 1) + self.offset_y + 1, 
                     self.gridSize, self.gridSize)
-                if self.matrix[r][c]["life"] == True:
+                if self.matrix[r][c] == True:
                     pygame.draw.rect(self.screen, self.colorFill, rect)
-                elif self.matrix[r][c]["life"] == False:
+                elif self.matrix[r][c] == False:
                     pygame.draw.rect(self.screen, self.colorUnfill, rect)
         # refresh the painting
         pygame.display.flip()
@@ -315,9 +301,8 @@ class Game(object):
                         pygame.quit()
 
             if pause == True:
-                self.next_gen()
                 continue
-                
+
             self.next_gen()
             self.print_state()
                                     
@@ -331,7 +316,7 @@ class Game(object):
             row = r + dr[i]
             col = c + dc[i]
             if row >= 0 and col >= 0 and row < self.row and col < self.col:
-                if self.matrix[row][col]["life"] == 1:
+                if self.matrix[row][col] == 1:
                     neighbours += 1
 
         return neighbours
