@@ -116,29 +116,32 @@ class Game(object):
         pygame.display.flip()
 
     def draw_help_text(self):
+        '''
         title = 'Conway\'s game of life'
         
         help_text = ['Mouse click to toggle cell state',
             '<SPACE> to start or pause the game', 
             '<d> or <1~9> to set random state', 
             '<r> to reset and <q> to quit']
+            
         '''    
+        title = u'康威生命游戏(Conway\'s game of life)'   
         help_text = [u'点击鼠标进行选择或取消',
         u'按空格键<SPACE>开始或暂停游戏', 
         u'按 d 或 1~9 随机设置细胞', 
         u'按 r 重置  按 q 退出']    
-        '''
         
-        myfont = pygame.font.SysFont('Purisa', 20, True)
+        
+        myfont = pygame.font.Font('fonts\simhei.ttf', 20)
         text = myfont.render(title, 1, (255, 150, 0))
         self.screen.blit(text, (470, 10))
 
-        myfont = pygame.font.SysFont('DejaVu Sans Mono', 20)
-        y = 10
+        myfont = pygame.font.Font('fonts\simhei.ttf', 14)
+        y = 3
         for line in help_text:
             text = myfont.render(line, True, (255, 0, 0))
             self.screen.blit(text, (25, y))
-            y += 10
+            y += 13
             
     def random_state(self, mode):
         # the probability whether a cell is initially alive
