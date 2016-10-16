@@ -177,6 +177,7 @@ class Game(object):
         
         if event.key == pygame.K_ESCAPE:
             pygame.quit()
+            sys.exit()
         elif event.key == pygame.K_r:
             print ('reseting grid...')
             self.reset_grid()
@@ -185,6 +186,7 @@ class Game(object):
             self.conway()
         elif event.key == pygame.K_q:
             pygame.quit()
+            sys.exit()
         # set random probability
         elif event.key == pygame.K_d:
             self.random_state(0)
@@ -222,6 +224,7 @@ class Game(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    sys.exit()
 
                 elif event.type == pygame.KEYDOWN:
                     self.handle_keyboard(event)
@@ -318,6 +321,7 @@ class Game(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    sys.exit()
                 # keyboard stroke
                 elif event.type == pygame.KEYDOWN:
                     # pause 
@@ -330,6 +334,7 @@ class Game(object):
                     # quit
                     elif event.key == pygame.K_q:
                         pygame.quit()
+                        sys.exit()
 
             if pause == True:
                 self.next_gen()
@@ -354,6 +359,7 @@ class Game(object):
         return neighbours
 
 def main():
+
     cf = myconf()
     cf.read("conf.ini")
     timeout = int(cf.get("config","timeout"))
