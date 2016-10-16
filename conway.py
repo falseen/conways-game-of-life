@@ -132,11 +132,11 @@ class Game(object):
         u'按 r 重置  按 q 退出']    
         
         
-        myfont = pygame.font.Font('fonts\simhei.ttf', 20)
+        myfont = pygame.font.SysFont('simhei', 20)
         text = myfont.render(title, 1, (255, 150, 0))
         self.screen.blit(text, (470, 10))
 
-        myfont = pygame.font.Font('fonts\simhei.ttf', 14)
+        myfont = pygame.font.SysFont('simhei', 14)
         y = 3
         for line in help_text:
             text = myfont.render(line, True, (255, 0, 0))
@@ -257,22 +257,19 @@ class Game(object):
                 if self.matrix[r][c]["life"] == True:
                     # die of under-popularion or overcrowding
                     if the_time - self.next_matrix[r][c]["time"] > 5:
-                        #print( u"超时")
                         self.next_matrix[r][c]["life"] = False
-                    elif neighbours < 2 or neighbours > 3:
-                        self.next_matrix[r][c]["life"] = False
-                        #self.next_matrix[r][c] = {"life":True, "time":the_time}
-                        pass
+                    else:
+                        if neighbours < 2 or neighbours > 3:
+                            self.next_matrix[r][c]["life"] = False
                 # cell is dead
                 else :
                     if neighbours == 3:
                         self.next_matrix[r][c] = {"life":True, "time":time.time()}
-                    else :
-                        self.next_matrix[r][c]["life"] = False
+  
         # set the matrix to be the new state
         for r in range(self.row):
             for c in range(self.col):
-                self.matrix[r][c] = self.next_matrix[r][c]
+                self.matrix[r][c] = self.next_matrix[r][c].copy()
 
     def print_state(self):
 
@@ -334,7 +331,7 @@ class Game(object):
             row = r + dr[i]
             col = c + dc[i]
             if row >= 0 and col >= 0 and row < self.row and col < self.col:
-                if self.matrix[row][col]["life"] == 1:
+                if self.matrix[row][col]["life"] == True:
                     neighbours += 1
 
         return neighbours
