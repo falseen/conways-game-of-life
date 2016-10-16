@@ -54,6 +54,8 @@ class Game(object):
         # dimension of the game window
         self.timeout = timeout
         self.new_game = new_game
+        self.step = False
+        self.pause = False
         self.width = 1280
         self.height = 650
         # start position of the cells
@@ -135,10 +137,10 @@ class Game(object):
             
         '''    
         title = u'康威生命游戏(Conway\'s game of life)'   
-        help_text = [u'点击鼠标进行选择或取消',
-        u'按空格键<SPACE>开始或暂停游戏', 
-        u'按 d 或 1~9 随机设置细胞', 
-        u'按 r 重置  按 q 退出']    
+        help_text = [u'1.按 w 键单步执行',
+        u'2.按空格键<SPACE>开始或暂停游戏', 
+        u'3.按 d 或 1~9 随机设置细胞', 
+        u'4.按 r 重置 ，按 q 退出']    
         time_out_text = ""
         if self.new_game == 1:
             time_out_text = "（超时时间 ：%s 秒）" %self.timeout
@@ -181,6 +183,10 @@ class Game(object):
         elif event.key == pygame.K_r:
             print ('reseting grid...')
             self.reset_grid()
+        elif event.key == pygame.K_w:
+            print ('start step...')
+            self.step = True
+            self.conway()
         elif event.key == pygame.K_SPACE:
             print ('space key pressed, game started...')
             self.conway()
@@ -258,17 +264,19 @@ class Game(object):
                 if self.matrix[idx_y][idx_x]["life"] == True:
                     pygame.draw.rect(self.screen, self.colorUnfill, rect)
                     self.matrix[idx_y][idx_x].update({"life":False})
-                    #self.next_matrix[idx_y][idx_x] = self.matrix[idx_y][idx_x].copy()
                 else:
                     pygame.draw.rect(self.screen, self.colorFill, rect)
                     self.matrix[idx_y][idx_x] = {"life":True, "time":time.time()}
-                    #self.next_matrix[idx_y][idx_x] = self.matrix[idx_y][idx_x].copy()
                 pygame.display.flip()
 
     def next_gen(self):
         the_time = time.time()
         for r in range(self.row):
             for c in range(self.col):
+                if self.pause:
+                    self.next_matrix[r][c].update({"time":time.time()})
+                    continue
+
                 neighbours = self.getNeighbours(r, c)
                 # if this cell is alive
                 if self.matrix[r][c]["life"] == True:
@@ -290,7 +298,9 @@ class Game(object):
         for r in range(self.row):
             for c in range(self.col):
                 self.matrix[r][c] = self.next_matrix[r][c].copy()
-
+        if self.step:
+            self.pause = True
+            self.step = False
     def print_state(self):
 
         for r in range(self.row):
@@ -310,7 +320,6 @@ class Game(object):
 
     def conway(self):
         running = True
-        pause = False
 
         while running:
             # make it 3fps
@@ -326,20 +335,20 @@ class Game(object):
                 elif event.type == pygame.KEYDOWN:
                     # pause 
                     if event.key == pygame.K_SPACE:
-                        pause = not pause
+                        self.pause = not self.pause
                     # reset the grid
                     elif event.key == pygame.K_r:
                         running = False
                         self.reset_grid()
+                    #step
+                    elif event.key == pygame.K_w:
+                        self.step = True
+                        self.pause = False
                     # quit
                     elif event.key == pygame.K_q:
                         pygame.quit()
                         sys.exit()
 
-            if pause == True:
-                self.next_gen()
-                continue
-                
             self.next_gen()
             self.print_state()
                                     
