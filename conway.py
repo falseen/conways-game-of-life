@@ -41,10 +41,19 @@ import sys, pygame
 import random
 import time
 from pygame.locals import *
+import configparser
+
+class myconf(configparser.ConfigParser):  
+    def __init__(self,defaults=None):  
+        configparser.ConfigParser.__init__(self,defaults=None)  
+    def optionxform(self, optionstr):
+        return optionstr
 
 class Game(object):
-    def __init__(self):
+    def __init__(self, timeout, new_game):
         # dimension of the game window
+        self.timeout = timeout
+        self.new_game = new_game
         self.width = 1280
         self.height = 650
         # start position of the cells
@@ -70,7 +79,7 @@ class Game(object):
         #self.background = pygame.Surface((self.width, self.height))
         #self.background.fill((255, 255, 255))
         self.screen.fill((255, 255, 255))
-
+        
         self.draw_help_text()
         self.drawGrid(self.offset_x, self.offset_y)
 
@@ -130,13 +139,16 @@ class Game(object):
         u'按空格键<SPACE>开始或暂停游戏', 
         u'按 d 或 1~9 随机设置细胞', 
         u'按 r 重置  按 q 退出']    
-        
-        
+        time_out_text = ""
+        if self.new_game == 1:
+            time_out_text = "（超时时间 ：%s 秒）" %self.timeout
         myfont = pygame.font.SysFont('simhei', 20)
         text = myfont.render(title, 1, (255, 150, 0))
         self.screen.blit(text, (470, 10))
-
+        
         myfont = pygame.font.SysFont('simhei', 14)
+        text = myfont.render(time_out_text, 1, (255, 0, 0))
+        self.screen.blit(text, (470+len(title)*3, 35))
         y = 3
         for line in help_text:
             text = myfont.render(line, True, (255, 0, 0))
@@ -242,10 +254,12 @@ class Game(object):
                 # flip the cell state
                 if self.matrix[idx_y][idx_x]["life"] == True:
                     pygame.draw.rect(self.screen, self.colorUnfill, rect)
-                    self.matrix[idx_y][idx_x]["life"] = False
+                    self.matrix[idx_y][idx_x].update({"life":False})
+                    #self.next_matrix[idx_y][idx_x] = self.matrix[idx_y][idx_x].copy()
                 else:
                     pygame.draw.rect(self.screen, self.colorFill, rect)
                     self.matrix[idx_y][idx_x] = {"life":True, "time":time.time()}
+                    #self.next_matrix[idx_y][idx_x] = self.matrix[idx_y][idx_x].copy()
                 pygame.display.flip()
 
     def next_gen(self):
@@ -256,16 +270,19 @@ class Game(object):
                 # if this cell is alive
                 if self.matrix[r][c]["life"] == True:
                     # die of under-popularion or overcrowding
-                    if the_time - self.next_matrix[r][c]["time"] > 5:
-                        self.next_matrix[r][c]["life"] = False
+                    if self.new_game == 1 and the_time - self.next_matrix[r][c]["time"] > self.timeout:
+                        self.next_matrix[r][c].update({"life":False})
                     else:
                         if neighbours < 2 or neighbours > 3:
-                            self.next_matrix[r][c]["life"] = False
+                            self.next_matrix[r][c].update({"life":False})
+                        else:
+                            self.next_matrix[r][c].update({"life":True,time:self.matrix[r][c]["time"]})
                 # cell is dead
                 else :
                     if neighbours == 3:
-                        self.next_matrix[r][c] = {"life":True, "time":time.time()}
-  
+                        self.next_matrix[r][c].update({"life":True, "time":time.time()})
+                    else:
+                        self.next_matrix[r][c].update({"life":False})
         # set the matrix to be the new state
         for r in range(self.row):
             for c in range(self.col):
@@ -337,7 +354,12 @@ class Game(object):
         return neighbours
 
 def main():
-    game = Game()
+    cf = myconf()
+    cf.read("conf.ini")
+    timeout = int(cf.get("config","timeout"))
+    new_game = int(cf.get("config","new_game"))
+    print(timeout, new_game)
+    game = Game(timeout, new_game)
     game.run()
 
 if __name__ == "__main__":
